@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #E8E4DD;
+  --color-accent: #E63B2E;
+  --color-background: #F5F3EE;
+  --color-dark: #111111;
+
+  --font-heading: "Space Grotesk", sans-serif;
+  --font-drama: "DM Serif Display", serif;
+  --font-data: "Space Mono", monospace;
+
+  --ease-magnetic: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-dark font-heading;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+}
+
+@layer utilities {
+  .clip-text {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
