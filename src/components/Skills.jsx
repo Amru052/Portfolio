@@ -298,7 +298,7 @@ export default function Skills() {
     }, []);
 
     return (
-        <section id="skills" ref={containerRef} className="relative w-full pt-24 pb-48 md:pb-64 px-6 md:px-12 max-w-6xl mx-auto z-10 transition-colors duration-300">
+        <section id="skills" ref={containerRef} className="relative w-full pt-24 pb-48 md:pb-64 px-6 md:px-12 max-w-6xl mx-auto z-10">
             <div className="mb-20">
                 <h2 className="font-heading font-bold text-4xl md:text-6xl mb-6 tracking-tight transition-colors duration-300">Functional Artifacts.</h2>
                 <p className="font-data text-sm md:text-base opacity-60 max-w-2xl leading-relaxed transition-opacity duration-300">

@@ -87,7 +87,7 @@ export default function Experience() {
     }, []);
 
     return (
-        <section id="experience" ref={containerRef} className="relative w-full overflow-hidden transition-colors duration-300">
+        <section id="experience" ref={containerRef} className="relative w-full overflow-hidden">
             <InteractiveDotGrid />
 
             <div className="py-24 px-6 md:px-12 max-w-6xl mx-auto z-10 relative">

@@ -43,7 +43,7 @@ function App() {
 
   return (
     <ReactLenis root>
-      <div ref={appRef} className="relative min-h-screen bg-background text-dark overflow-hidden selection:bg-accent selection:text-white transition-colors duration-300">
+      <div ref={appRef} className="relative min-h-screen bg-background text-dark overflow-hidden selection:bg-accent selection:text-white">
         {/* Global Noise Overlay */}
         <div className="fixed inset-0 pointer-events-none z-[100] opacity-5 mix-blend-overlay">
           <svg width="100%" height="100%">
