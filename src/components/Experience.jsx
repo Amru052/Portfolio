@@ -123,7 +123,7 @@ export default function Experience() {
                                     </div>
                                 </div>
 
-                                <div className="lg:w-2/3 bg-current/5 p-6 md:p-8 rounded-xl border border-current/10 shadow-inner backdrop-blur-sm transition-colors duration-300">
+                                <div className="lg:w-2/3 bg-current/5 p-6 md:p-8 rounded-2xl border border-current/10 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] transition-colors duration-300">
                                     <ul className="flex flex-col gap-3 font-data text-sm opacity-70 leading-relaxed transition-opacity duration-300">
                                         {exp.details.map((detail, idx) => (
                                             <li key={idx} className="flex items-start gap-4">

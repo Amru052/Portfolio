@@ -116,7 +116,7 @@ export default function Certifications() {
 
             <div className="flex flex-col gap-10">
                 {certs.map((cert, i) => (
-                    <div key={i} className="cert-card bg-current/5 border border-current/10 p-8 md:p-12 rounded-xl flex flex-col md:flex-row gap-8 md:gap-16 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group">
+                    <div key={i} className="cert-card bg-current/5 backdrop-blur-2xl border border-current/10 p-8 md:p-12 rounded-2xl flex flex-col md:flex-row gap-8 md:gap-16 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_8px_30px_rgba(0,0,0,0.1)] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group">
                         <div className="md:w-1/3 flex flex-col items-start justify-between min-h-full">
                             <div>
                                 <span className="font-data text-xs text-accent uppercase tracking-widest mb-4 border border-accent/20 bg-accent/5 px-2 py-1 rounded inline-block">

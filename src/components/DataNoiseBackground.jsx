@@ -21,7 +21,8 @@ export default function DataNoiseBackground() {
             particles.forEach(p => gsap.killTweensOf(p));
             particles = [];
 
-            const targetCount = 800;
+            const isMobile = window.innerWidth < 768;
+            const targetCount = isMobile ? 250 : 800; // Reduce count on phones
             const area = width * height;
             const spacing = Math.sqrt(area / targetCount);
 
@@ -59,8 +60,17 @@ export default function DataNoiseBackground() {
         const resize = () => {
             width = window.innerWidth;
             height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
+
+            // Fix blur on high-DPI displays
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+
+            // CSS size
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+
             initParticles();
         };
 

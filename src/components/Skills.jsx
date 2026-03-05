@@ -309,7 +309,7 @@ export default function Skills() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
 
                 {/* Pillar 1: Business Statistics */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
+                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6 md:p-8">
                     <ControlChartAnimator />
                     <div>
                         <h3 className="font-heading font-bold text-xl mb-2 group-hover:text-accent transition-colors duration-300">Statistical Quality Control & Design</h3>
@@ -320,7 +320,7 @@ export default function Skills() {
                 </div>
 
                 {/* Pillar 2: Machine Learning */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
+                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6 md:p-8">
                     <DiagnosticShuffler />
                     <div>
                         <h3 className="font-heading font-bold text-xl mb-2 group-hover:text-accent transition-colors duration-300">Machine Learning & Forecasting</h3>
@@ -331,7 +331,7 @@ export default function Skills() {
                 </div>
 
                 {/* Pillar 3: Data Analytics & BI */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
+                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6 md:p-8">
                     <TelemetryTypewriter />
                     <div>
                         <h3 className="font-heading font-bold text-xl mb-2 group-hover:text-accent transition-colors duration-300">Data Exploration & Dashboards</h3>
@@ -342,7 +342,7 @@ export default function Skills() {
                 </div>
 
                 {/* Pillar 4: Full-Stack */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
+                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6 md:p-8">
                     <CursorProtocolScheduler />
                     <div>
                         <h3 className="font-heading font-bold text-xl mb-2 group-hover:text-accent transition-colors duration-300">Full-Stack Deployment</h3>

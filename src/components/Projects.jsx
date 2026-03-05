@@ -116,7 +116,7 @@ export default function Projects() {
                     style={{ zIndex: i, marginTop: i > 0 ? '50vh' : '0' }}
                 >
                     {/* Canvas representation */}
-                    <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center overflow-hidden">
+                    <div className="absolute inset-0 opacity-40 pointer-events-none flex items-center justify-center overflow-hidden">
                         {proj.canvas === 'laser' && (
                             <div className="relative w-full h-full" style={{ filter: 'url(#goo)' }}>
                                 <style>{`
@@ -180,7 +180,7 @@ export default function Projects() {
                         )}
                     </div>
 
-                    <div className="relative z-10 max-w-5xl mx-auto w-full flex flex-col items-start px-4">
+                    <div className="relative z-10 max-w-4xl mx-auto w-full flex flex-col items-start bg-white/5 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.1)] border border-white/20 rounded-3xl p-8 md:p-14">
                         <div className="flex items-center gap-4 mb-8">
                             <span className="font-data text-xs text-paper bg-dark px-3 py-1 rounded-sm uppercase tracking-widest">
                                 {String(i + 1).padStart(2, '0')}
