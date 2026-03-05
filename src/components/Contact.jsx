@@ -20,7 +20,7 @@ export default function Contact() {
                         <ArrowUpRight size={22} className="group-hover/btn:rotate-45 transition-transform duration-300" />
                     </a>
 
-                    <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="group/btn flex items-center justify-between gap-8 bg-transparent border border-dark/20 text-dark px-8 py-5 rounded-2xl font-heading font-medium text-lg hover:border-dark transition-colors duration-300 hover:scale-[1.03] ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
+                    <a href="https://www.linkedin.com/in/amru-rasyid-hammami/" target="_blank" rel="noreferrer" className="group/btn flex items-center justify-between gap-8 bg-transparent border border-dark/20 text-dark px-8 py-5 rounded-2xl font-heading font-medium text-lg hover:border-dark transition-colors duration-300 hover:scale-[1.03] ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
                         <span className="tracking-wide">LinkedIn Node</span>
                         <ArrowUpRight size={22} className="group-hover/btn:rotate-45 transition-transform duration-300" />
                     </a>

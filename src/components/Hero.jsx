@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ArrowDownRight } from 'lucide-react';
+import DataNoiseBackground from './DataNoiseBackground';
 
 export default function Hero() {
     const containerRef = useRef(null);
@@ -31,9 +32,11 @@ export default function Hero() {
     return (
         <section
             ref={containerRef}
-            className="relative w-full h-[100dvh] flex flex-col items-center justify-center px-6"
+            className="relative w-full h-[100dvh] flex flex-col items-center justify-center px-6 overflow-hidden"
         >
-            <div className="max-w-5xl w-full flex flex-col items-start z-10">
+            <DataNoiseBackground />
+
+            <div className="relative max-w-5xl w-full flex flex-col items-start z-10">
                 <p className="hero-text font-data text-accent mb-4 tracking-widest uppercase text-sm">
                     System Initialized // v1.0.0
                 </p>

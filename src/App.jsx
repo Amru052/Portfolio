@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -15,8 +15,32 @@ import Footer from './components/Footer';
 gsap.registerPlugin(ScrollTrigger);
 
 function App() {
+  const appRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Create a timeline specifically for background color shifts
+      const bgTimeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: '#skills', // Target the skills section
+          start: 'top 60%',   // When the top of the skills section hits 60% of viewport
+          end: 'bottom 20%',  // When the bottom of the skills section hits 20% of viewport (pushes end point further down)
+          scrub: 0.5,         // Smooth, fluid transition synced with scrolling
+        }
+      });
+
+      // Morph background to dark and text to light as we enter #skills
+      // Morph background back to light and text to dark as we leave and enter Experience
+      bgTimeline
+        .to(appRef.current, { backgroundColor: '#111111', color: '#E8E4DD', duration: 1 })
+        .to(appRef.current, { backgroundColor: '#F5F3EE', color: '#111111', duration: 1 }, '+=2'); // Add a longer pause where it stays dark inside the section
+    }, appRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <div className="relative min-h-screen bg-background text-dark overflow-hidden selection:bg-accent selection:text-white">
+    <div ref={appRef} className="relative min-h-screen bg-background text-dark overflow-hidden selection:bg-accent selection:text-white transition-colors duration-300">
       {/* Global Noise Overlay */}
       <div className="fixed inset-0 pointer-events-none z-[100] opacity-5 mix-blend-overlay">
         <svg width="100%" height="100%">

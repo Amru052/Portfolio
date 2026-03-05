@@ -18,9 +18,8 @@ export default function Navbar() {
     return (
         <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 px-4 pointer-events-none">
             <nav
-                className={`pointer-events-auto relative flex items-center justify-between px-6 py-3 rounded-full border border-transparent transition-all duration-500 w-full max-w-5xl ${isScrolled ? 'shadow-sm' : ''}`}
+                className={`pointer-events-auto relative flex items-center justify-between px-6 py-3 rounded-full transition-all duration-500 w-full max-w-5xl ${isScrolled ? 'shadow-sm bg-background/90 backdrop-blur-xl border border-dark/10' : 'border border-transparent'}`}
             >
-                <div className={`absolute inset-0 rounded-full transition-opacity duration-500 -z-10 ${isScrolled ? 'opacity-100 bg-background/90 backdrop-blur-xl border border-dark/10' : 'opacity-0'}`}></div>
 
                 <div className="text-dark font-heading font-bold text-lg cursor-pointer hover:scale-[1.03] transition-transform duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
                     Amru R. Hammami
