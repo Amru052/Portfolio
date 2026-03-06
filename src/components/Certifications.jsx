@@ -5,6 +5,14 @@ import { X, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
+import bnspFront from '../assets/certificates/bnsp/front.webp';
+import bnspBack from '../assets/certificates/bnsp/back.webp';
+import toeflCertFront from '../assets/certificates/toefl/certificate_front.webp';
+import toeflCertBack from '../assets/certificates/toefl/certificate_back.webp';
+import toeflScoreFront from '../assets/certificates/toefl/score_report_front.webp';
+import toeflScoreBack from '../assets/certificates/toefl/score_report_back.webp';
+import sqlAdvanced from '../assets/certificates/sql/sql_advanced_certificate.webp';
+
 const certs = [
     {
         title: "Business Intelligence Analyst",
@@ -15,7 +23,7 @@ const certs = [
             "Competent in developing BI solutions (dashboards & reports) to support strategic business decisions.",
             "Officially recognized by the Indonesian government based on national competency standards (SKKNI)."
         ],
-        images: ["https://placehold.co/800x600/111111/E8E4DD?text=BI+Credential+Doc"]
+        images: [bnspFront, bnspBack]
     },
     {
         title: "TOEFL ITP® Official Score Report",
@@ -26,8 +34,10 @@ const certs = [
             "Achieved C1-level proficiency in Listening Comprehension (68/68 - Max Score) and Reading Comprehension (61/67)."
         ],
         images: [
-            "https://placehold.co/800x600/111111/E8E4DD?text=TOEFL+Page+1",
-            "https://placehold.co/800x600/111111/E63B2E?text=TOEFL+Page+2"
+            toeflScoreFront,
+            toeflScoreBack,
+            toeflCertFront,
+            toeflCertBack
         ]
     },
     {
@@ -39,7 +49,7 @@ const certs = [
             "Assessed on core database concepts including effective Data Modeling, Indexing strategies, and principles of Query Optimization.",
             "Verified technical skills through a standardized assessment on HackerRank, a leading industry platform for evaluating developer talent."
         ],
-        images: ["https://placehold.co/800x600/111111/E8E4DD?text=SQL+Advanced+HackerRank"]
+        images: [sqlAdvanced]
     }
 ];
 
@@ -50,6 +60,9 @@ export default function Certifications() {
     // Modal State
     const [selectedCert, setSelectedCert] = useState(null);
     const [currentImageIdx, setCurrentImageIdx] = useState(0);
+    const [isZoomed, setIsZoomed] = useState(false);
+    const [zoomOrigin, setZoomOrigin] = useState('50% 50%');
+    const imageContainerRef = useRef(null);
 
     const openModal = (cert) => {
         setSelectedCert(cert);
@@ -58,20 +71,58 @@ export default function Certifications() {
     };
 
     const closeModal = () => {
-        setSelectedCert(null);
-        document.body.style.overflow = 'auto';
+        // Trigger exit animation before unmounting
+        const modal = document.querySelector('.cert-modal-container');
+        const backdrop = document.querySelector('.cert-modal-backdrop');
+        if (modal && backdrop) {
+            gsap.to(modal, { y: '100%', opacity: 0, duration: 0.4, ease: 'power3.in' });
+            gsap.to(backdrop, {
+                opacity: 0, duration: 0.4, ease: 'power3.in', onComplete: () => {
+                    setSelectedCert(null);
+                    setIsZoomed(false);
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        } else {
+            setSelectedCert(null);
+            setIsZoomed(false);
+            document.body.style.overflow = 'auto';
+        }
     };
 
     const nextImage = (e) => {
         e.stopPropagation();
         if (!selectedCert) return;
         setCurrentImageIdx((prev) => (prev + 1) % selectedCert.images.length);
+        setIsZoomed(false);
     };
 
     const prevImage = (e) => {
         e.stopPropagation();
         if (!selectedCert) return;
         setCurrentImageIdx((prev) => (prev === 0 ? selectedCert.images.length - 1 : prev - 1));
+        setIsZoomed(false);
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isZoomed || !imageContainerRef.current) return;
+        const { left, top, width, height } = imageContainerRef.current.getBoundingClientRect();
+        // Calculate percentages
+        const x = ((e.clientX - left) / width) * 100;
+        const y = ((e.clientY - top) / height) * 100;
+        setZoomOrigin(`${x}% ${y}%`);
+    };
+
+    const toggleZoom = (e) => {
+        e.stopPropagation();
+        if (!isZoomed && imageContainerRef.current) {
+            // Set initial zoom origin to cursor position
+            const { left, top, width, height } = imageContainerRef.current.getBoundingClientRect();
+            const x = ((e.clientX - left) / width) * 100;
+            const y = ((e.clientY - top) / height) * 100;
+            setZoomOrigin(`${x}% ${y}%`);
+        }
+        setIsZoomed(!isZoomed);
     };
 
     useEffect(() => {
@@ -98,9 +149,13 @@ export default function Certifications() {
     // Animate Modal In
     useEffect(() => {
         if (selectedCert && modalRef.current) {
+            const backdrop = document.querySelector('.cert-modal-backdrop');
+            if (backdrop) {
+                gsap.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power3.out' });
+            }
             gsap.fromTo(modalRef.current,
-                { opacity: 0, scale: 0.95, y: 20 },
-                { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: 'power3.out' }
+                { opacity: 0, y: '100%' },
+                { opacity: 1, y: '0%', duration: 0.5, ease: 'power3.out', delay: 0.1 }
             );
         }
     }, [selectedCert]);
@@ -159,12 +214,13 @@ export default function Certifications() {
             {selectedCert && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" onClick={closeModal}>
                     {/* Backdrop */}
-                    <div className="absolute inset-0 bg-dark/80 backdrop-blur-sm transition-opacity duration-300"></div>
+                    <div className="cert-modal-backdrop absolute inset-0 bg-dark/80 backdrop-blur-sm opacity-0"></div>
 
                     {/* Modal Content */}
                     <div
                         ref={modalRef}
-                        className="relative w-full max-w-5xl bg-paper shadow-2xl rounded-sm overflow-hidden flex flex-col pt-10"
+                        className="cert-modal-container relative w-full max-w-[95vw] md:max-w-[85vw] bg-paper shadow-2xl rounded-sm overflow-hidden flex flex-col pt-10 opacity-0 translate-y-full"
+                        style={{ maxHeight: '95vh', height: 'fit-content' }}
                         onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
                     >
                         {/* Close Button */}
@@ -176,11 +232,24 @@ export default function Certifications() {
                         </button>
 
                         {/* Image Viewer */}
-                        <div className="relative w-full aspect-[4/3] md:aspect-[16/9] bg-[#E8E4DD] flex items-center justify-center p-4">
+                        <div
+                            ref={imageContainerRef}
+                            className="relative w-full flex items-center justify-center p-4 bg-[#E8E4DD] overflow-hidden"
+                            style={{
+                                height: 'calc(95vh - 100px)',
+                                cursor: isZoomed ? 'zoom-out' : 'zoom-in'
+                            }}
+                            onMouseMove={handleMouseMove}
+                            onClick={toggleZoom}
+                        >
                             <img
                                 src={selectedCert.images[currentImageIdx]}
                                 alt={`${selectedCert.title} credential page ${currentImageIdx + 1}`}
-                                className="max-w-full max-h-full object-contain shadow-lg border border-black/5"
+                                className="max-w-full max-h-full w-auto object-contain shadow-lg border border-black/5 transition-transform duration-200 ease-out"
+                                style={{
+                                    transform: isZoomed ? 'scale(2.5)' : 'scale(1)',
+                                    transformOrigin: zoomOrigin
+                                }}
                             />
 
                             {/* Slider Controls (Only show if multiple images) */}

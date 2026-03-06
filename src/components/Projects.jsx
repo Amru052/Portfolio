@@ -1,25 +1,55 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { X } from 'lucide-react';
+import { useLenis } from 'lenis/react';
+
+gsap.registerPlugin(ScrollTrigger);
+
+import algaeDashboard from '../assets/projects/algae/main_dashboard.webp';
+import algaeBiomass from '../assets/projects/algae/biomass_analysis.webp';
+import algaeExternal from '../assets/projects/algae/external_sources.webp';
+
+import sentimentHome from '../assets/projects/sentiment/home_page.webp';
+import sentimentProcess from '../assets/projects/sentiment/process.webp';
+import sentimentOutput from '../assets/projects/sentiment/output.webp';
+
+const financePlaceholder = "https://placehold.co/1200x800/111111/E8E4DD?text=Financial+Dashboard";
 
 const projects = [
     {
         title: "Algae Monitoring Web App",
         client: "PETRONAS",
         desc: "Developed a full-stack dashboard deployed on NVIDIA Jetson Nano utilizing PHP and Node-RED for real-time control.",
-        canvas: "laser"
+        canvas: "laser",
+        items: [
+            { type: 'text', content: "Due to a signed NDA with PETRONAS Research Sdn. Bhd., the actual dashboard cannot be displayed. These are the 1st iteration designs with dummy data." },
+            { type: 'image', src: algaeDashboard },
+            { type: 'image', src: algaeBiomass },
+            { type: 'image', src: algaeExternal }
+        ]
     },
     {
         title: "Aspect-Based Sentiment Analysis",
         client: "Digital Population Identity",
         desc: "Built a CNN/NLP model achieving 84% accuracy for analyzing Indonesia's Digital Population Identity app reviews.",
-        canvas: "geometry"
+        canvas: "geometry",
+        items: [
+            { type: 'image', src: sentimentHome },
+            { type: 'image', src: sentimentProcess },
+            { type: 'image', src: sentimentOutput }
+        ]
     },
     {
         title: "Village Financial Dashboard",
         client: "KKN PM",
         desc: "Developed a local government budgeting dashboard to automate complex manual Excel transitions.",
-        canvas: "waveform"
+        canvas: "waveform",
+        items: [
+            { type: 'image', src: financePlaceholder },
+            { type: 'image', src: financePlaceholder },
+            { type: 'image', src: financePlaceholder }
+        ]
     }
 ];
 
@@ -55,7 +85,7 @@ function SentimentPopup() {
     const isError = ['Error', 'Crash', 'Lag', 'Unresponsive', 'Needs', 'Bug', 'Loss', 'Refused'].some(keyword => data.text.includes(keyword));
 
     return (
-        <div className="absolute" style={{ top: data.top, left: data.left, transform: 'translate(-50%, -50%)' }}>
+        <div className="absolute" style={{ top: data.top, left: data.left, transform: 'translate(-50%, -50%)', zIndex: 0 }}>
             <div key={data.key} className="whitespace-nowrap opacity-0 mix-blend-multiply" style={{ animation: 'popupSentiment 4s ease-in-out forwards' }}>
                 <span className={isError ? 'text-accent' : 'text-dark'}>
                     {data.text}
@@ -65,8 +95,167 @@ function SentimentPopup() {
     );
 }
 
+function CardSwap({ items, onImageClick }) {
+    const [cards, setCards] = useState(items.map((item, i) => ({ id: i, ...item })));
+    const [isHovered, setIsHovered] = useState(false);
+
+    useEffect(() => {
+        if (isHovered) return;
+        const interval = setInterval(() => {
+            setCards((prev) => {
+                const newCards = [...prev];
+                const topCard = newCards.pop();
+                newCards.unshift(topCard);
+                return newCards;
+            });
+        }, 3500); // Auto-flip every 3.5 seconds
+        return () => clearInterval(interval);
+    }, [isHovered]);
+
+    const handleSwap = (e, index) => {
+        e.stopPropagation();
+        if (index !== cards.length - 1) return; // Only swap top card
+        setCards((prev) => {
+            const newCards = [...prev];
+            const topCard = newCards.pop();
+            newCards.unshift(topCard);
+            return newCards;
+        });
+    };
+
+    const handleBackgroundSwap = (e, isTop) => {
+        e.stopPropagation();
+        if (!isTop) {
+            setCards((prev) => {
+                const newCards = [...prev];
+                const topCard = newCards.pop();
+                newCards.unshift(topCard);
+                return newCards;
+            });
+        }
+    }
+
+    return (
+        <div
+            className="relative w-full h-full flex items-center justify-center p-4 perspective-1000"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            {cards.map((card, idx) => {
+                const isTop = idx === cards.length - 1;
+                const rIdx = cards.length - 1 - idx;
+                const isImage = card.type === 'image';
+
+                return (
+                    <div
+                        key={card.id}
+                        className={`absolute w-full max-w-2xl flex items-center justify-center flex-col aspect-[4/3] rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.1)] transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer border border-white/20 ${!isImage ? 'bg-[#111111] p-8 text-center border-l-4 border-l-accent' : ''} ${isTop ? 'hover:-translate-y-4 hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)]' : ''}`}
+                        style={{
+                            zIndex: idx,
+                            transform: `translateY(${rIdx * 20}px) scale(${1 - rIdx * 0.05}) rotate(${rIdx === 0 ? 0 : rIdx % 2 === 0 ? rIdx * 2 : -rIdx * 2}deg)`,
+                            opacity: 1 - rIdx * 0.2,
+                        }}
+                        onClick={(e) => isTop ? (isImage && onImageClick({ title: card.title || "Image", src: card.src })) : handleBackgroundSwap(e, isTop)}
+                    >
+                        {/* Overlay to dim backgrounds */}
+                        {!isTop && <div className="absolute inset-0 bg-dark/20 mix-blend-overlay z-10 pointer-events-none"></div>}
+
+                        {isImage ? (
+                            <img src={card.src} alt="Project Preview" className="absolute w-full h-full object-cover object-top" />
+                        ) : (
+                            <p className="relative z-10 font-data text-white text-base md:text-xl lg:text-2xl leading-relaxed">
+                                {card.content}
+                            </p>
+                        )}
+
+                        {/* Expand hint for top card */}
+                        {isTop && isImage && (
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg-dark/40 z-20">
+                                <span className="font-data text-paper border border-paper px-6 py-3 rounded-full uppercase tracking-widest text-sm backdrop-blur-md shadow-xl">
+                                    Click to Expand
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Swap button on the top card */}
+                        {isTop && cards.length > 1 && (
+                            <button
+                                className="absolute bottom-4 right-4 z-30 font-data text-xs text-dark bg-paper/90 backdrop-blur-md px-4 py-2 rounded shadow-lg uppercase tracking-widest hover:bg-paper hover:scale-105 transition-all"
+                                onClick={(e) => handleSwap(e, idx)}
+                            >
+                                Next Image
+                            </button>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
 export default function Projects() {
     const containerRef = useRef(null);
+    const [openedProject, setOpenedProject] = useState(null);
+    const lenis = useLenis();
+
+    const closeProjectModal = () => {
+        // Trigger exit animation before unmounting
+        const modal = document.querySelector('.project-modal-container');
+        const backdrop = document.querySelector('.project-modal-backdrop');
+        if (modal && backdrop) {
+            gsap.to(modal, { y: '100%', duration: 0.4, ease: 'power3.in' });
+            gsap.to(backdrop, {
+                opacity: 0, duration: 0.4, ease: 'power3.in', onComplete: () => {
+                    setOpenedProject(null);
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        } else {
+            setOpenedProject(null);
+            document.body.style.overflow = 'auto';
+        }
+    };
+
+    const openProjectImg = (title, src, index) => {
+        // Find the ScrollTrigger instance for this specific project
+        const st = ScrollTrigger.getById(`project-trigger-${index}`);
+        const currentY = window.scrollY || document.documentElement.scrollTop;
+
+        if (st && Math.abs(currentY - st.start) > 5) {
+            // Concurrently smoothly scroll the background to perfectly align the project
+            // using Lenis so it doesn't fight the user's smooth scroll instance
+            if (lenis) {
+                lenis.scrollTo(st.start, { duration: 0.8, lock: true }); // lock prevents user scrolling during auto-scroll
+            } else {
+                window.scrollTo({ top: st.start, behavior: 'smooth' });
+            }
+
+            // Wait 500ms for the scroll animation to visually progress before opening the modal
+            setTimeout(() => {
+                setOpenedProject({ title, src });
+            }, 500);
+
+            // Lock scrolling only after the alignment finishes, so we don't break the scroll animation
+            setTimeout(() => {
+                document.body.style.overflow = 'hidden';
+            }, 850);
+        } else {
+            // If already aligned, open immediately
+            setOpenedProject({ title, src });
+            document.body.style.overflow = 'hidden';
+        }
+    };
+
+    useEffect(() => {
+        if (openedProject) {
+            const modal = document.querySelector('.project-modal-container');
+            const backdrop = document.querySelector('.project-modal-backdrop');
+            if (modal && backdrop) {
+                gsap.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power3.out' });
+                gsap.fromTo(modal, { y: '100%' }, { y: '0%', duration: 0.5, ease: 'power3.out', delay: 0.1 });
+            }
+        }
+    }, [openedProject]);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -76,9 +265,10 @@ export default function Projects() {
                 if (i < cards.length - 1) {
                     const tl = gsap.timeline({
                         scrollTrigger: {
+                            id: `project-trigger-${i}`,
                             trigger: card,
                             start: "top top",
-                            end: "+=150%", // Total scroll distance for this card
+                            end: "+=150%",
                             pin: true,
                             pinSpacing: false,
                             scrub: true,
@@ -91,13 +281,14 @@ export default function Projects() {
                         opacity: 0.5,
                         ease: "none",
                         duration: 1
-                    }, 0.5); // Add a 0.5 second relative delay before the blur starts (acts as a scroll buffer)
+                    }, 0.5);
 
                 } else {
                     ScrollTrigger.create({
+                        id: `project-trigger-${i}`,
                         trigger: card,
                         start: "top top",
-                        end: "+=100%", // Give it some scrolling room
+                        end: "+=100%",
                         pin: true,
                         pinSpacing: true,
                     });
@@ -112,11 +303,11 @@ export default function Projects() {
             {projects.map((proj, i) => (
                 <div
                     key={i}
-                    className="project-card h-[100dvh] w-full flex flex-col justify-center items-center bg-paper border-t border-dark/10 p-6 md:p-12 overflow-hidden shadow-[0_-10px_30px_rgba(0,0,0,0.05)] origin-top relative"
+                    className="project-card h-[100dvh] w-full flex flex-col justify-center items-center bg-paper border-t border-dark/10 p-4 md:p-8 lg:p-12 overflow-hidden shadow-[0_-10px_30px_rgba(0,0,0,0.05)] origin-top relative"
                     style={{ zIndex: i, marginTop: i > 0 ? '50vh' : '0' }}
                 >
                     {/* Canvas representation */}
-                    <div className="absolute inset-0 opacity-40 pointer-events-none flex items-center justify-center overflow-hidden">
+                    <div className="absolute inset-0 opacity-40 pointer-events-none flex items-center justify-center overflow-hidden z-0">
                         {proj.canvas === 'laser' && (
                             <div className="relative w-full h-full" style={{ filter: 'url(#goo)' }}>
                                 <style>{`
@@ -180,27 +371,73 @@ export default function Projects() {
                         )}
                     </div>
 
-                    <div className="relative z-10 max-w-4xl mx-auto w-full flex flex-col items-start bg-white/5 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.1)] border border-white/20 rounded-3xl p-8 md:p-14">
-                        <div className="flex items-center gap-4 mb-8">
-                            <span className="font-data text-xs text-paper bg-dark px-3 py-1 rounded-sm uppercase tracking-widest">
-                                {String(i + 1).padStart(2, '0')}
-                            </span>
-                            <span className="font-data text-sm text-dark/60 tracking-widest uppercase bg-paper/50 backdrop-blur-md px-3 py-1 rounded-sm">
-                                {proj.client}
-                            </span>
+                    <div className="relative z-10 max-w-[90rem] mx-auto w-full flex flex-col lg:flex-row items-center justify-between gap-8 h-[90%] md:h-[85%] mt-12 md:mt-16">
+
+                        {/* Text Content */}
+                        <div className="flex-1 flex flex-col items-start bg-white/5 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.1)] border border-white/20 rounded-3xl p-6 md:p-12 w-full max-w-2xl mx-auto lg:mx-0 order-2 lg:order-1 self-start lg:self-center mt-auto lg:mt-0">
+                            <div className="flex items-center gap-4 mb-6 md:mb-8">
+                                <span className="font-data text-xs text-paper bg-dark px-3 py-1 rounded-sm uppercase tracking-widest flex-shrink-0">
+                                    {String(i + 1).padStart(2, '0')}
+                                </span>
+                                <span className="font-data text-xs md:text-sm text-dark/60 tracking-widest uppercase bg-paper/50 backdrop-blur-md px-3 py-1 rounded-sm block">
+                                    {proj.client}
+                                </span>
+                            </div>
+
+                            <h2 className="font-heading font-bold text-4xl md:text-6xl lg:text-7xl text-dark mb-6 leading-[0.9] tracking-tighter">
+                                {proj.title}
+                            </h2>
+
+                            <p className="font-data text-sm md:text-lg text-dark/70 w-full leading-relaxed">
+                                {proj.desc}
+                            </p>
                         </div>
 
-                        <h2 className="font-heading font-bold text-5xl md:text-7xl lg:text-8xl text-dark mb-8 leading-[0.9] tracking-tighter">
-                            {proj.title}
-                        </h2>
-
-                        <p className="font-data text-base md:text-xl text-dark/70 max-w-2xl leading-relaxed">
-                            {proj.desc}
-                        </p>
+                        {/* Card Swap Section */}
+                        <div className="flex-1 w-full h-[40vh] md:h-[50vh] lg:h-full relative flex items-center justify-center order-1 lg:order-2">
+                            <CardSwap items={proj.items} onImageClick={({ title, src }) => openProjectImg(proj.title, src, i)} />
+                        </div>
                     </div>
                 </div>
-            ))
-            }
-        </section >
+            ))}
+
+            {/* Project Full Image Modal */}
+            {openedProject && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10" onClick={closeProjectModal}>
+                    {/* Transparent Backdrop (No blur or dark overlay) */}
+                    <div className="project-modal-backdrop absolute inset-0 bg-transparent opacity-0"></div>
+
+                    {/* Modal Content - 80% width and height */}
+                    <div
+                        className="project-modal-container relative w-[95vw] h-[85vh] md:w-[80vw] md:h-[80vh] flex flex-col rounded-2xl shadow-2xl translate-y-full"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Light Bend Glass Overlay (Matches Navbar Gloss) */}
+                        <div className="absolute inset-0 rounded-2xl pointer-events-none shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2)] border border-white/20 z-30"></div>
+
+                        {/* Title Bar (Matte Glass) */}
+                        <div className="flex items-center justify-between p-4 bg-paper/85 backdrop-blur-md border-b border-dark/10 text-dark z-20 shadow-sm rounded-t-2xl">
+                            <h3 className="font-data font-bold tracking-widest uppercase text-sm md:text-base">{openedProject.title}</h3>
+                            <button
+                                onClick={closeProjectModal}
+                                className="w-8 h-8 hover:bg-dark/10 rounded flex items-center justify-center transition-colors duration-200"
+                                aria-label="Close modal"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Image Viewer (Glossy Dark Glass) */}
+                        <div className="flex-1 w-full h-full overflow-hidden flex items-center justify-center p-4 bg-dark/40 backdrop-blur-2xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.5),0_4px_20px_rgba(0,0,0,0.1)] relative z-10 rounded-b-2xl">
+                            <img
+                                src={openedProject.src}
+                                alt={openedProject.title}
+                                className="w-full h-full object-contain mx-auto mix-blend-normal drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+        </section>
     );
 }
