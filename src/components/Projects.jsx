@@ -409,14 +409,14 @@ export default function Projects() {
 
                     {/* Modal Content - 80% width and height */}
                     <div
-                        className="project-modal-container relative w-[95vw] h-[85vh] md:w-[80vw] md:h-[80vh] flex flex-col rounded-2xl shadow-2xl translate-y-full"
+                        className="project-modal-container relative w-[95vw] h-auto max-h-[85vh] md:w-[80vw] md:h-[80vh] flex flex-col rounded-2xl shadow-2xl translate-y-full"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Light Bend Glass Overlay (Matches Navbar Gloss) */}
                         <div className="absolute inset-0 rounded-2xl pointer-events-none shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2)] border border-white/20 z-30"></div>
 
                         {/* Title Bar (Matte Glass) */}
-                        <div className="flex items-center justify-between p-4 bg-paper/85 backdrop-blur-md border-b border-dark/10 text-dark z-20 shadow-sm rounded-t-2xl">
+                        <div className="flex items-center justify-between p-4 bg-paper/85 backdrop-blur-md border-b border-dark/10 text-dark z-20 shadow-sm rounded-t-2xl flex-shrink-0">
                             <h3 className="font-data font-bold tracking-widest uppercase text-sm md:text-base">{openedProject.title}</h3>
                             <button
                                 onClick={closeProjectModal}
@@ -428,11 +428,11 @@ export default function Projects() {
                         </div>
 
                         {/* Image Viewer (Glossy Dark Glass) */}
-                        <div className="flex-1 w-full h-full overflow-hidden flex items-center justify-center p-4 bg-dark/40 backdrop-blur-2xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.5),0_4px_20px_rgba(0,0,0,0.1)] relative z-10 rounded-b-2xl">
+                        <div className="w-full flex-1 min-h-0 overflow-hidden flex items-center justify-center p-2 md:p-4 bg-dark/40 backdrop-blur-2xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.5),0_4px_20px_rgba(0,0,0,0.1)] relative z-10 rounded-b-2xl">
                             <img
                                 src={openedProject.src}
                                 alt={openedProject.title}
-                                className="w-full h-full object-contain mx-auto mix-blend-normal drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                                className="w-full h-auto max-h-full md:w-auto md:h-full md:max-w-full object-contain mx-auto mix-blend-normal drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
                             />
                         </div>
                     </div>
