@@ -16,8 +16,26 @@ import { ReactLenis } from 'lenis/react';
 
 gsap.registerPlugin(ScrollTrigger);
 
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 function App() {
   const appRef = useRef(null);
+  const lenisRef = useRef(null);
+
+  useEffect(() => {
+    function update(time) {
+      if (lenisRef.current?.lenis) {
+        lenisRef.current.lenis.raf(time * 1000);
+      }
+    }
+
+    gsap.ticker.lagSmoothing(0);
+    gsap.ticker.add(update);
+
+    return () => {
+      gsap.ticker.remove(update);
+    };
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -42,7 +60,7 @@ function App() {
   }, []);
 
   return (
-    <ReactLenis root>
+    <ReactLenis root ref={lenisRef} autoRaf={false}>
       <div ref={appRef} className="relative min-h-screen bg-background text-dark overflow-hidden selection:bg-accent selection:text-white">
         {/* Global Noise Overlay */}
         <div className="fixed inset-0 pointer-events-none z-[100] opacity-5 mix-blend-overlay">
