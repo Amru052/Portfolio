@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # Ignore all webp images
-*.webp
+# *.webp

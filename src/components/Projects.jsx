@@ -14,7 +14,13 @@ import sentimentHome from '../assets/projects/sentiment/home_page.webp';
 import sentimentProcess from '../assets/projects/sentiment/process.webp';
 import sentimentOutput from '../assets/projects/sentiment/output.webp';
 
-const financePlaceholder = "https://placehold.co/1200x800/111111/E8E4DD?text=Financial+Dashboard";
+import financeMain from '../assets/projects/dashboard_ponorogo/1_overview_main.webp';
+import financeSub from '../assets/projects/dashboard_ponorogo/2_overview_sub.webp';
+import financeActivity from '../assets/projects/dashboard_ponorogo/3_overview_activity.webp';
+import financeDetail from '../assets/projects/dashboard_ponorogo/4_overview_detail.webp';
+import financeBudget from '../assets/projects/dashboard_ponorogo/5_budget_planning.webp';
+import financeExpenditure from '../assets/projects/dashboard_ponorogo/6_expenditure.webp';
+import financeReports from '../assets/projects/dashboard_ponorogo/7_reports.webp';
 
 const projects = [
     {
@@ -45,10 +51,16 @@ const projects = [
         client: "KKN PM",
         desc: "Developed a local government budgeting dashboard to automate complex manual Excel transitions.",
         canvas: "waveform",
+        demoUrl: "https://demo-dashboard-ponorogo.vercel.app/",
         items: [
-            { type: 'image', src: financePlaceholder },
-            { type: 'image', src: financePlaceholder },
-            { type: 'image', src: financePlaceholder }
+            { type: 'text', content: "DISCLAIMER: This dashboard is a mockup for demonstration purposes only. Most features are non-functional and the data shown is for illustrative purposes." },
+            { type: 'image', src: financeMain },
+            { type: 'image', src: financeSub },
+            { type: 'image', src: financeActivity },
+            { type: 'image', src: financeDetail },
+            { type: 'image', src: financeBudget },
+            { type: 'image', src: financeExpenditure },
+            { type: 'image', src: financeReports }
         ]
     }
 ];
@@ -387,9 +399,21 @@ export default function Projects() {
                                 {proj.title}
                             </h2>
 
-                            <p className="font-data text-sm md:text-lg text-dark/70 w-full leading-relaxed">
+                            <p className="font-data text-sm md:text-lg text-dark/70 w-full leading-relaxed mb-6">
                                 {proj.desc}
                             </p>
+
+                            {proj.demoUrl && (
+                                <a
+                                    href={proj.demoUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group relative inline-flex items-center gap-2 bg-dark text-paper px-6 py-3 rounded-full font-data text-sm uppercase tracking-widest overflow-hidden transition-all hover:scale-105 active:scale-95"
+                                >
+                                    <span className="relative z-10">Open Demo Site</span>
+                                    <div className="absolute inset-0 bg-accent translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                                </a>
+                            )}
                         </div>
 
                         {/* Card Swap Section */}
