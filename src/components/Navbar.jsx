@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useLenis } from 'lenis/react';
 
 export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
+    const lenis = useLenis();
+
+    const scrollToSection = (e, id) => {
+        e.preventDefault();
+        if (lenis) {
+            lenis.scrollTo(id, { duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+        } else {
+            document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
 
     // Toggle for Glass Finish: 'gloss' or 'matte'
     // 'gloss' = high reflection, edge distortion, glassy feel
@@ -35,21 +44,29 @@ export default function Navbar() {
     // Extracting the inner layout so the glass background can mirror its exact size invisibly
     const InnerNav = ({ isVisible }) => (
         <nav className={`relative flex items-center justify-between px-6 py-3 w-full max-w-5xl ${!isVisible ? 'opacity-0 pointer-events-none' : 'pointer-events-auto'}`}>
-            <div className={`font-heading font-bold text-lg ${isVisible ? 'cursor-pointer hover:scale-[1.03]' : ''} transition-transform duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]`}>
+            <a href="#top" onClick={(e) => scrollToSection(e, 'top')} className={`font-heading font-bold text-lg ${isVisible ? 'cursor-pointer hover:scale-[1.03]' : ''} transition-transform duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] block`}>
                 Amru R. Hammami
-            </div>
+            </a>
 
-            <ul className="hidden md:flex items-center gap-8 font-data text-sm tracking-tight text-white/90">
-                {['Skills', 'Projects', 'Experience'].map((item) => (
+            <ul className="hidden md:flex items-center gap-6 font-data text-sm tracking-tight text-white/90">
+                {['Skills', 'Experience', 'Projects', 'Certifications'].map((item) => (
                     <li key={item}>
-                        <a href={`#${item.toLowerCase()}`} className={`${isVisible ? 'hover:text-white hover:scale-[1.03]' : ''} transition-all inline-block duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]`}>
+                        <a
+                            href={`#${item.toLowerCase()}`}
+                            onClick={(e) => scrollToSection(e, `#${item.toLowerCase()}`)}
+                            className={`${isVisible ? 'hover:text-white hover:scale-[1.03]' : ''} transition-all inline-block duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]`}
+                        >
                             {item}
                         </a>
                     </li>
                 ))}
             </ul>
 
-            <a href="#contact" className={`bg-white text-black px-6 py-2 rounded-full font-heading font-medium text-sm ${isVisible ? 'hover:scale-[1.03]' : ''} transition-transform duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]`}>
+            <a
+                href="#contact"
+                onClick={(e) => scrollToSection(e, '#contact')}
+                className={`bg-white text-black px-6 py-2 rounded-full font-heading font-medium text-sm ${isVisible ? 'hover:scale-[1.03]' : ''} transition-transform duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]`}
+            >
                 Contact
             </a>
         </nav>

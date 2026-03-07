@@ -334,12 +334,6 @@ export default function Projects() {
                                         100% { opacity: 0; transform: scale(1.1) translateY(-20px); } 
                                     }
                                 `}</style>
-                                {/* Background wireframe brain/node */}
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] border-[0.5px] border-dark/10 rounded-full animate-[spin_40s_linear_infinite] pointer-events-none">
-                                    <div className="absolute inset-x-0 h-px bg-dark/10 top-1/2"></div>
-                                    <div className="absolute inset-y-0 w-px bg-dark/10 left-1/2"></div>
-                                    <div className="absolute inset-0 border-[0.5px] border-dark/5 rounded-full scale-75"></div>
-                                </div>
 
                                 {/* 14 Independent Randomized Popups */}
                                 {[...Array(14)].map((_, i) => <SentimentPopup key={i} />)}
