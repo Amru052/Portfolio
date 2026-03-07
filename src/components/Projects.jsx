@@ -371,10 +371,10 @@ export default function Projects() {
                         )}
                     </div>
 
-                    <div className="relative z-10 max-w-[90rem] mx-auto w-full flex flex-col lg:flex-row items-center justify-between gap-8 h-[90%] md:h-[85%] mt-12 md:mt-16">
+                    <div className="relative z-10 max-w-[90rem] mx-auto w-full flex flex-col lg:flex-row items-center justify-between gap-6 md:gap-8 h-[90%] md:h-[95%] lg:h-[85%] mt-12 md:mt-16">
 
                         {/* Text Content */}
-                        <div className="flex-1 flex flex-col items-start bg-white/5 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.1)] border border-white/20 rounded-3xl p-6 md:p-12 w-full max-w-2xl mx-auto lg:mx-0 order-2 lg:order-1 self-start lg:self-center mt-auto lg:mt-0">
+                        <div className="flex-none lg:flex-1 flex flex-col items-start bg-white/5 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.1)] border border-white/20 rounded-3xl p-6 md:p-8 lg:p-12 w-full max-w-lg md:max-w-2xl mx-auto lg:mx-0 order-2 lg:order-1 self-start lg:self-center mt-4 lg:mt-0 h-fit">
                             <div className="flex items-center gap-4 mb-6 md:mb-8">
                                 <span className="font-data text-xs text-paper bg-dark px-3 py-1 rounded-sm uppercase tracking-widest flex-shrink-0">
                                     {String(i + 1).padStart(2, '0')}
@@ -384,7 +384,7 @@ export default function Projects() {
                                 </span>
                             </div>
 
-                            <h2 className="font-heading font-bold text-4xl md:text-6xl lg:text-7xl text-dark mb-6 leading-[0.9] tracking-tighter">
+                            <h2 className="font-heading font-bold text-4xl md:text-5xl lg:text-7xl text-dark mb-4 md:mb-6 leading-[0.9] tracking-tighter">
                                 {proj.title}
                             </h2>
 
@@ -394,7 +394,7 @@ export default function Projects() {
                         </div>
 
                         {/* Card Swap Section */}
-                        <div className="flex-1 w-full h-[40vh] md:h-[50vh] lg:h-full relative flex items-center justify-center order-1 lg:order-2">
+                        <div className="flex-1 lg:flex-1 w-full max-w-md md:max-w-2xl lg:max-w-none mx-auto min-h-0 relative flex items-center justify-center order-1 lg:order-2">
                             <CardSwap items={proj.items} onImageClick={({ title, src }) => openProjectImg(proj.title, src, i)} />
                         </div>
                     </div>
