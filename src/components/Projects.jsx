@@ -303,8 +303,13 @@ export default function Projects() {
             {projects.map((proj, i) => (
                 <div
                     key={i}
-                    className="project-card h-[100vh] w-full flex flex-col justify-center items-center bg-paper border-t border-dark/10 p-4 md:p-8 lg:p-12 overflow-hidden shadow-[0_-10px_30px_rgba(0,0,0,0.05)] origin-top relative"
-                    style={{ zIndex: i, marginTop: i > 0 ? '50vh' : '0' }}
+                    className="project-card h-[100vh] w-full flex flex-col justify-center items-center bg-paper border-t border-dark/10 p-4 md:p-8 lg:p-12 overflow-hidden shadow-[0_-10px_30px_rgba(0,0,0,0.05)] origin-top relative will-change-transform transform-gpu"
+                    style={{
+                        zIndex: i,
+                        marginTop: i > 0 ? '50vh' : '0',
+                        backfaceVisibility: 'hidden',
+                        WebkitFontSmoothing: 'subpixel-antialiased'
+                    }}
                 >
                     {/* Canvas representation */}
                     <div className="absolute inset-0 opacity-40 pointer-events-none flex items-center justify-center overflow-hidden z-0">
