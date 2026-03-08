@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
+
+gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
 
 // Statistical Quality Control Chart (New Pillar 1)
 function ControlChartAnimator() {
@@ -218,6 +221,145 @@ function TelemetryTypewriter() {
     );
 }
 
+// Correlation Matrix Animator (New for EDA)
+function CorrelationMatrixAnimator() {
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            const cells = containerRef.current.querySelectorAll('.corr-cell');
+            const tl = gsap.timeline({ repeat: -1 });
+
+            // Randomly "activate" cells with a pulse
+            tl.to(cells, {
+                opacity: 0.8,
+                duration: 0.5,
+                stagger: {
+                    each: 0.05,
+                    from: "random",
+                    grid: [5, 5]
+                },
+                ease: 'power2.inOut'
+            })
+                .to(cells, {
+                    opacity: 0.3,
+                    duration: 0.8,
+                    stagger: {
+                        each: 0.03,
+                        from: "edges",
+                        grid: [5, 5]
+                    },
+                    ease: 'power2.inOut'
+                });
+
+            // Animate the diagonal (Self-correlation)
+            tl.to('.corr-diag', {
+                filter: 'brightness(1.5)',
+                duration: 0.5,
+                repeat: 3,
+                yoyo: true
+            }, 0);
+
+        }, containerRef);
+        return () => ctx.revert();
+    }, []);
+
+    return (
+        <div className="relative h-48 w-full bg-[#0D0D0D] rounded-xl border border-paper/10 p-6 overflow-hidden flex items-center justify-center shadow-inner" ref={containerRef}>
+            <div className="absolute top-3 left-3 text-[#F5F3EE]/40 uppercase text-[9px] tracking-widest border border-[#F5F3EE]/20 px-2 py-0.5 rounded">EDA_CORR_MATRIX</div>
+
+            <div className="grid grid-cols-5 gap-1.5 w-32 h-32">
+                {Array.from({ length: 25 }).map((_, i) => {
+                    const row = Math.floor(i / 5);
+                    const col = i % 5;
+                    const isDiag = row === col;
+                    const opacity = isDiag ? 0.9 : 0.2 + (Math.random() * 0.3);
+
+                    return (
+                        <div
+                            key={i}
+                            className={`corr-cell w-full h-full rounded-[2px] transition-colors ${isDiag ? 'corr-diag bg-accent' : 'bg-paper'}`}
+                            style={{ opacity }}
+                        ></div>
+                    );
+                })}
+            </div>
+
+            <div className="ml-6 flex flex-col gap-2">
+                <div className="w-16 h-1 bg-accent/20 rounded-full overflow-hidden">
+                    <div className="w-2/3 h-full bg-accent animate-[shimmer_2s_infinite]"></div>
+                </div>
+                <div className="w-12 h-1 bg-paper/10 rounded-full"></div>
+                <div className="w-20 h-1 bg-paper/10 rounded-full"></div>
+            </div>
+        </div>
+    );
+}
+
+// Database Flow Animator (New for Engineering)
+function DatabaseFlowAnimator() {
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            const tl = gsap.timeline({ repeat: -1 });
+
+            // Pulse the tables
+            tl.to('.db-table', {
+                borderColor: 'rgba(230, 59, 46, 0.4)',
+                duration: 1,
+                stagger: 0.5,
+                yoyo: true,
+                repeat: -1
+            });
+
+            // Animate packets flowing
+            gsap.to('.db-packet', {
+                motionPath: {
+                    path: '#flow-path',
+                    autoRotate: true
+                },
+                duration: 3,
+                repeat: -1,
+                ease: 'none',
+                stagger: 1
+            });
+
+        }, containerRef);
+        return () => ctx.revert();
+    }, []);
+
+    return (
+        <div className="relative h-48 w-full bg-[#121212] rounded-xl border border-paper/10 p-4 overflow-hidden flex items-center justify-around shadow-inner" ref={containerRef}>
+            <div className="absolute top-3 right-3 text-[#F5F3EE]/40 uppercase text-[9px] tracking-widest border border-[#F5F3EE]/20 px-2 py-0.5 rounded">SQL_ETL_NODE</div>
+
+            <div className="db-table w-16 h-20 border border-paper/20 rounded-lg bg-paper/[0.02] flex flex-col p-2 gap-1 relative z-10">
+                <div className="w-full h-2 bg-paper/20 rounded-sm"></div>
+                <div className="w-full h-1 bg-paper/10 rounded-sm"></div>
+                <div className="w-3/4 h-1 bg-paper/10 rounded-sm"></div>
+                <div className="w-full h-1 bg-paper/10 rounded-sm"></div>
+            </div>
+
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 300 100">
+                <path id="flow-path" d="M 110 50 Q 150 20 190 50" fill="none" stroke="transparent" />
+                <circle className="db-packet" r="2" fill="#E63B2E" />
+                <circle className="db-packet" r="2" fill="#E63B2E" />
+            </svg>
+
+            <div className="db-table w-16 h-20 border border-paper/20 rounded-lg bg-paper/[0.02] flex flex-col p-2 gap-1 relative z-10">
+                <div className="w-full h-2 bg-accent/40 rounded-sm"></div>
+                <div className="w-full h-1 bg-paper/10 rounded-sm"></div>
+                <div className="w-full h-1 bg-accent/20 rounded-sm"></div>
+                <div className="w-1/2 h-1 bg-paper/10 rounded-sm"></div>
+            </div>
+
+            <div className="absolute bottom-4 left-0 w-full flex justify-center">
+                <div className="text-[8px] font-data text-paper/20 tracking-widest uppercase">Relational_Mapping_Active</div>
+            </div>
+        </div>
+    );
+}
+
 // Cursor Protocol Scheduler
 function CursorProtocolScheduler() {
     const containerRef = useRef(null);
@@ -290,7 +432,7 @@ export default function Skills() {
                 y: 40,
                 opacity: 0,
                 duration: 1,
-                stagger: 0.15,
+                stagger: 0.1,
                 ease: 'power3.out'
             });
         }, containerRef);
@@ -302,52 +444,74 @@ export default function Skills() {
             <div className="mb-20">
                 <h2 className="font-heading font-bold text-4xl md:text-6xl mb-6 tracking-tight transition-colors duration-300">Functional Artifacts.</h2>
                 <p className="font-data text-sm md:text-base opacity-60 max-w-2xl leading-relaxed transition-opacity duration-300">
-                    A rigorous foundation in Business Statistics and Data Analytics, paired with Full-Stack engineering capabilities. Four core technical pillars driving robust, scalable, and intelligent solutions.
+                    A rigorous foundation in Business Statistics and Data Analytics, paired with Full-Stack engineering capabilities. Six core technical pillars driving robust, scalable, and intelligent solutions.
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
 
                 {/* Pillar 1: Business Statistics */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6 md:p-8">
+                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
                     <ControlChartAnimator />
                     <div>
-                        <h3 className="font-heading font-bold text-xl mb-2 group-hover:text-accent transition-colors duration-300">Statistical Quality Control & Design</h3>
-                        <p className="font-data text-sm opacity-50 transition-opacity duration-300 leading-relaxed">
-                            Probability, Multivariate Analysis, QC, Experiment Design.
+                        <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-accent transition-colors duration-300">Statistical Quality Control</h3>
+                        <p className="font-data text-xs opacity-50 transition-opacity duration-300 leading-relaxed">
+                            Control Charts (X-bar, R, S), Multivariate Analysis, QC, Experiment Design.
                         </p>
                     </div>
                 </div>
 
                 {/* Pillar 2: Machine Learning */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6 md:p-8">
+                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
                     <DiagnosticShuffler />
                     <div>
-                        <h3 className="font-heading font-bold text-xl mb-2 group-hover:text-accent transition-colors duration-300">Machine Learning & Forecasting</h3>
-                        <p className="font-data text-sm opacity-50 transition-opacity duration-300 leading-relaxed">
-                            CNN, NLP, Business Forecasting, Unstructured Data.
+                        <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-accent transition-colors duration-300">Machine Learning & Forecasting</h3>
+                        <p className="font-data text-xs opacity-50 transition-opacity duration-300 leading-relaxed">
+                            CNN, NLP, Predictive Modeling, Time-Series Forecasting.
                         </p>
                     </div>
                 </div>
 
-                {/* Pillar 3: Data Analytics & BI */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6 md:p-8">
+                {/* Pillar 3: Data Analytics & EDA */}
+                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
+                    <CorrelationMatrixAnimator />
+                    <div>
+                        <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-accent transition-colors duration-300">Advanced Data Analytics</h3>
+                        <p className="font-data text-xs opacity-50 transition-opacity duration-300 leading-relaxed">
+                            Python, Pandas, Exploratory Data Analysis (EDA), Correlation Studies.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Pillar 4: Business Intelligence */}
+                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
                     <TelemetryTypewriter />
                     <div>
-                        <h3 className="font-heading font-bold text-xl mb-2 group-hover:text-accent transition-colors duration-300">Data Exploration & Dashboards</h3>
-                        <p className="font-data text-sm opacity-50 transition-opacity duration-300 leading-relaxed">
-                            Telemetry, Power BI, Tableau, Chart.js.
+                        <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-accent transition-colors duration-300">Business Intelligence</h3>
+                        <p className="font-data text-xs opacity-50 transition-opacity duration-300 leading-relaxed">
+                            Power BI, Tableau, Chart.js, Interactive Reporting Dashboards.
                         </p>
                     </div>
                 </div>
 
-                {/* Pillar 4: Full-Stack */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6 md:p-8">
+                {/* Pillar 5: Data Engineering */}
+                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
+                    <DatabaseFlowAnimator />
+                    <div>
+                        <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-accent transition-colors duration-300">Data Engineering & DB</h3>
+                        <p className="font-data text-xs opacity-50 transition-opacity duration-300 leading-relaxed">
+                            SQL (MySQL/PostgreSQL), Azure, ETL Processes, Data Architecture.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Pillar 6: Full-Stack (Secondary) */}
+                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6 opacity-80">
                     <CursorProtocolScheduler />
                     <div>
-                        <h3 className="font-heading font-bold text-xl mb-2 group-hover:text-accent transition-colors duration-300">Full-Stack Deployment</h3>
-                        <p className="font-data text-sm opacity-50 transition-opacity duration-300 leading-relaxed">
-                            SQL, PHP, Azure, Jetson Nano.
+                        <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-accent transition-colors duration-300">Full-Stack Engineering</h3>
+                        <p className="font-data text-xs opacity-50 transition-opacity duration-300 leading-relaxed">
+                            React, Node.js, PHP, IoT Device Deployment (Jetson Nano).
                         </p>
                     </div>
                 </div>

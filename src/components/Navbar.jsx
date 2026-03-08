@@ -45,7 +45,7 @@ export default function Navbar() {
     const InnerNav = ({ isVisible }) => (
         <nav className={`relative flex items-center justify-between px-6 py-3 w-full max-w-5xl ${!isVisible ? 'opacity-0 pointer-events-none' : 'pointer-events-auto'}`}>
             <a href="#top" onClick={(e) => scrollToSection(e, 'top')} className={`font-heading font-bold text-lg ${isVisible ? 'cursor-pointer hover:scale-[1.03]' : ''} transition-transform duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] block`}>
-                Amru R. Hammami
+                Amru Rasyid H.
             </a>
 
             <ul className="hidden md:flex items-center gap-6 font-data text-sm tracking-tight text-white/90">
