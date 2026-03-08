@@ -423,20 +423,124 @@ export default function Skills() {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.from('.skill-card', {
-                scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: 'top 75%',
-                    toggleActions: 'play reverse play reverse'
-                },
-                y: 40,
-                opacity: 0,
-                duration: 1,
-                stagger: 0.1,
-                ease: 'power3.out'
-            });
+            gsap.fromTo('.skill-card',
+                { y: 40, opacity: 0 },
+                {
+                    y: 0,
+                    opacity: 1,
+                    scrollTrigger: {
+                        trigger: containerRef.current,
+                        start: 'top 75%',
+                        toggleActions: 'play reverse play reverse'
+                    },
+                    duration: 1,
+                    stagger: 0.1,
+                    ease: 'power3.out'
+                }
+            );
         }, containerRef);
         return () => ctx.revert();
+    }, []);
+
+    // Cursor-proximity edge glow + hover full glow + spill-to-neighbors
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        let rafId = null;
+
+        const handleMouseMove = (e) => {
+            if (rafId) return;
+            rafId = requestAnimationFrame(() => {
+                const mouseX = e.clientX;
+                const mouseY = e.clientY;
+                const cards = container.querySelectorAll('.skill-card');
+
+                let hoveredCard = null;
+                let hoveredRect = null;
+
+                // Pass 1: detect hover state, set cursor vars, apply proximity glow
+                cards.forEach((card) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = mouseX - rect.left;
+                    const y = mouseY - rect.top;
+
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+
+                    const isHovering = mouseX >= rect.left && mouseX <= rect.right &&
+                        mouseY >= rect.top && mouseY <= rect.bottom;
+
+                    if (isHovering) {
+                        hoveredCard = card;
+                        hoveredRect = rect;
+                        card.classList.add('skill-card--hover');
+                        card.classList.remove('skill-card--glow');
+                    } else {
+                        card.classList.remove('skill-card--hover');
+
+                        // Edge glow when cursor is near (but not hovering)
+                        const pad = 100;
+                        const isNear = mouseX >= rect.left - pad && mouseX <= rect.right + pad &&
+                            mouseY >= rect.top - pad && mouseY <= rect.bottom + pad;
+
+                        if (isNear) {
+                            card.classList.add('skill-card--glow');
+                        } else {
+                            card.classList.remove('skill-card--glow');
+                        }
+                    }
+                });
+
+                // Pass 2: if a card is hovered, spill glow to adjacent cards
+                if (hoveredCard && hoveredRect) {
+                    const hCX = hoveredRect.left + hoveredRect.width / 2;
+                    const hCY = hoveredRect.top + hoveredRect.height / 2;
+
+                    cards.forEach((card) => {
+                        if (card === hoveredCard) return;
+                        const rect = card.getBoundingClientRect();
+                        const cCX = rect.left + rect.width / 2;
+                        const cCY = rect.top + rect.height / 2;
+
+                        const dist = Math.sqrt((hCX - cCX) ** 2 + (hCY - cCY) ** 2);
+
+                        // Apply spill glow to adjacent cards (center-to-center < 600px)
+                        if (dist < 600) {
+                            // Point the glow toward the hovered card
+                            const spillX = hCX - rect.left;
+                            const spillY = hCY - rect.top;
+                            card.style.setProperty('--mouse-x', `${spillX}px`);
+                            card.style.setProperty('--mouse-y', `${spillY}px`);
+                            card.classList.add('skill-card--glow');
+                        }
+                    });
+                }
+
+                rafId = null;
+            });
+        };
+
+        const handleMouseLeave = () => {
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
+            const cards = container.querySelectorAll('.skill-card');
+            cards.forEach((card) => {
+                card.classList.remove('skill-card--glow');
+                card.classList.remove('skill-card--hover');
+            });
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        container.addEventListener('mouseleave', handleMouseLeave);
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            container.removeEventListener('mouseleave', handleMouseLeave);
+            if (rafId) cancelAnimationFrame(rafId);
+        };
     }, []);
 
     return (
@@ -451,7 +555,7 @@ export default function Skills() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
 
                 {/* Pillar 1: Business Statistics */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
+                <div className="skill-card relative flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-dark/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
                     <ControlChartAnimator />
                     <div>
                         <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-accent transition-colors duration-300">Statistical Quality Control</h3>
@@ -462,7 +566,7 @@ export default function Skills() {
                 </div>
 
                 {/* Pillar 2: Machine Learning */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
+                <div className="skill-card relative flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-dark/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
                     <DiagnosticShuffler />
                     <div>
                         <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-accent transition-colors duration-300">Machine Learning & Forecasting</h3>
@@ -473,7 +577,7 @@ export default function Skills() {
                 </div>
 
                 {/* Pillar 3: Data Analytics & EDA */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
+                <div className="skill-card relative flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-dark/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
                     <CorrelationMatrixAnimator />
                     <div>
                         <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-accent transition-colors duration-300">Advanced Data Analytics</h3>
@@ -484,7 +588,7 @@ export default function Skills() {
                 </div>
 
                 {/* Pillar 4: Business Intelligence */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
+                <div className="skill-card relative flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-dark/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
                     <TelemetryTypewriter />
                     <div>
                         <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-accent transition-colors duration-300">Business Intelligence</h3>
@@ -495,7 +599,7 @@ export default function Skills() {
                 </div>
 
                 {/* Pillar 5: Data Engineering */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
+                <div className="skill-card relative flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-dark/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6">
                     <DatabaseFlowAnimator />
                     <div>
                         <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-accent transition-colors duration-300">Data Engineering & DB</h3>
@@ -506,7 +610,7 @@ export default function Skills() {
                 </div>
 
                 {/* Pillar 6: Full-Stack (Secondary) */}
-                <div className="skill-card flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-transform transition-shadow duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-current/5 backdrop-blur-2xl border border-current/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6 opacity-80">
+                <div className="skill-card relative flex flex-col gap-6 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] bg-dark/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl p-6 opacity-80">
                     <CursorProtocolScheduler />
                     <div>
                         <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-accent transition-colors duration-300">Full-Stack Engineering</h3>

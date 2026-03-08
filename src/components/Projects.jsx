@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, memo } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { X } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLenis } from 'lenis/react';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -107,9 +107,10 @@ function SentimentPopup() {
     );
 }
 
-function CardSwap({ items, onImageClick }) {
+const CardSwap = memo(function CardSwap({ items, onImageClick }) {
     const [cards, setCards] = useState(items.map((item, i) => ({ id: i, ...item })));
     const [isHovered, setIsHovered] = useState(false);
+    const cardRefs = useRef({});
 
     useEffect(() => {
         if (isHovered) return;
@@ -135,6 +136,33 @@ function CardSwap({ items, onImageClick }) {
         });
     };
 
+    // GSAP-based hover raise for the top card (CSS hover can't override GSAP inline transforms)
+    const handleCardHover = (cardId, isTop) => {
+        if (!isTop) return;
+        const el = cardRefs.current[cardId];
+        if (!el) return;
+        gsap.to(el, {
+            y: -16,
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            duration: 0.35,
+            ease: 'power2.out',
+            overwrite: 'auto'
+        });
+    };
+
+    const handleCardLeave = (cardId, isTop, rIdx) => {
+        if (!isTop) return;
+        const el = cardRefs.current[cardId];
+        if (!el) return;
+        gsap.to(el, {
+            y: rIdx * 20,
+            boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+            duration: 0.35,
+            ease: 'power2.out',
+            overwrite: 'auto'
+        });
+    };
+
     const handleBackgroundSwap = (e, isTop) => {
         e.stopPropagation();
         if (!isTop) {
@@ -153,65 +181,81 @@ function CardSwap({ items, onImageClick }) {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            {cards.map((card, idx) => {
-                const isTop = idx === cards.length - 1;
-                const rIdx = cards.length - 1 - idx;
-                const isImage = card.type === 'image';
+            {(() => {
+                const maxVisible = Math.min(4, cards.length);
+                const visibleCards = cards.slice(-maxVisible);
+                return visibleCards.map((card, sliceIdx) => {
+                    const isTop = sliceIdx === visibleCards.length - 1;
+                    const rIdx = visibleCards.length - 1 - sliceIdx;
+                    const isImage = card.type === 'image';
 
-                return (
-                    <div
-                        key={card.id}
-                        className={`absolute w-full max-w-2xl flex items-center justify-center flex-col aspect-[4/3] rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.1)] transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer border border-white/20 ${!isImage ? 'bg-[#111111] p-8 text-center border-l-4 border-l-accent' : ''} ${isTop ? 'hover:-translate-y-4 hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)]' : ''}`}
-                        style={{
-                            zIndex: idx,
-                            transform: `translateY(${rIdx * 20}px) scale(${1 - rIdx * 0.05}) rotate(${rIdx === 0 ? 0 : rIdx % 2 === 0 ? rIdx * 2 : -rIdx * 2}deg)`,
-                            opacity: 1 - rIdx * 0.2,
-                        }}
-                        onClick={(e) => isTop ? (isImage && onImageClick({ title: card.title || "Image", src: card.src })) : handleBackgroundSwap(e, isTop)}
-                    >
-                        {/* Overlay to dim backgrounds */}
-                        {!isTop && <div className="absolute inset-0 bg-dark/20 mix-blend-overlay z-10 pointer-events-none"></div>}
+                    return (
+                        <div
+                            key={card.id}
+                            ref={el => { if (el) cardRefs.current[card.id] = el; }}
+                            className={`absolute w-full max-w-2xl flex items-center justify-center flex-col aspect-[4/3] rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.1)] transition-[opacity] duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer border border-white/20 ${!isImage ? 'bg-[#111111] p-8 text-center border-l-4 border-l-accent' : ''}`}
+                            style={{
+                                zIndex: sliceIdx,
+                                transform: `translate3d(0, ${rIdx * 20}px, 0) scale(${1 - rIdx * 0.05}) rotate(${rIdx === 0 ? 0 : rIdx % 2 === 0 ? rIdx * 2 : -rIdx * 2}deg)`,
+                                opacity: 1 - rIdx * 0.2,
+                                willChange: 'transform, opacity',
+                            }}
+                            onMouseEnter={() => handleCardHover(card.id, isTop)}
+                            onMouseLeave={() => handleCardLeave(card.id, isTop, rIdx)}
+                            onClick={(e) => isTop ? (isImage && onImageClick({ title: card.title || "Image", src: card.src })) : handleBackgroundSwap(e, isTop)}
+                        >
+                            {/* Overlay to dim backgrounds */}
+                            {!isTop && <div className="absolute inset-0 bg-dark/20 mix-blend-overlay z-10 pointer-events-none"></div>}
 
-                        {isImage ? (
-                            <img src={card.src} alt="Project Preview" className="absolute w-full h-full object-cover object-top" />
-                        ) : (
-                            <p className="relative z-10 font-data text-white text-base md:text-xl lg:text-2xl leading-relaxed">
-                                {card.content}
-                            </p>
-                        )}
+                            {isImage ? (
+                                <img src={card.src} alt="Project Preview" loading="lazy" className="absolute w-full h-full object-cover object-top" />
+                            ) : (
+                                <p className="relative z-10 font-data text-white text-base md:text-xl lg:text-2xl leading-relaxed">
+                                    {card.content}
+                                </p>
+                            )}
 
-                        {/* Expand hint for top card */}
-                        {isTop && isImage && (
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg-dark/40 z-20">
-                                <span className="font-data text-paper border border-paper px-6 py-3 rounded-full uppercase tracking-widest text-sm backdrop-blur-md shadow-xl">
-                                    Click to Expand
-                                </span>
-                            </div>
-                        )}
+                            {/* Expand hint for top card */}
+                            {isTop && isImage && (
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg-dark/40 z-20">
+                                    <span className="font-data text-paper border border-paper px-6 py-3 rounded-full uppercase tracking-widest text-sm backdrop-blur-md shadow-xl">
+                                        Click to Expand
+                                    </span>
+                                </div>
+                            )}
 
-                        {/* Swap button on the top card */}
-                        {isTop && cards.length > 1 && (
-                            <button
-                                className="absolute bottom-4 right-4 z-30 font-data text-xs text-dark bg-paper/90 backdrop-blur-md px-4 py-2 rounded shadow-lg uppercase tracking-widest hover:bg-paper hover:scale-105 transition-all"
-                                onClick={(e) => handleSwap(e, idx)}
-                            >
-                                Next Image
-                            </button>
-                        )}
-                    </div>
-                );
-            })}
+                            {/* Swap button on the top card */}
+                            {isTop && cards.length > 1 && (
+                                <button
+                                    className="absolute bottom-4 right-4 z-30 font-data text-xs text-dark bg-paper/90 backdrop-blur-md px-4 py-2 rounded shadow-lg uppercase tracking-widest hover:bg-paper hover:scale-105 transition-all"
+                                    onClick={(e) => handleSwap(e, sliceIdx)}
+                                >
+                                    Next Image
+                                </button>
+                            )}
+                        </div>
+                    );
+                });
+            })()}
         </div>
     );
-}
+});
 
 export default function Projects() {
     const containerRef = useRef(null);
     const [openedProject, setOpenedProject] = useState(null);
+    const modalOpenRef = useRef(false);
+    const imageRef = useRef(null);
+    const slideDirection = useRef(0);
     const lenis = useLenis();
 
+    // Get the image-only items for the currently opened project
+    const getProjectImages = (projectIndex) => {
+        if (projectIndex == null || !projects[projectIndex]) return [];
+        return projects[projectIndex].items.filter(item => item.type === 'image');
+    };
+
     const closeProjectModal = () => {
-        // Trigger exit animation before unmounting
         const modal = document.querySelector('.project-modal-container');
         const backdrop = document.querySelector('.project-modal-backdrop');
         if (modal && backdrop) {
@@ -228,44 +272,83 @@ export default function Projects() {
         }
     };
 
-    const openProjectImg = (title, src, index) => {
-        // Find the ScrollTrigger instance for this specific project
-        const st = ScrollTrigger.getById(`project-trigger-${index}`);
+    const navigateModal = (direction) => {
+        if (!openedProject) return;
+        const images = getProjectImages(openedProject.projectIndex);
+        if (images.length <= 1) return;
+
+        // Slide current image out
+        slideDirection.current = direction;
+        const imgEl = imageRef.current;
+        if (imgEl) {
+            gsap.to(imgEl, {
+                x: direction * -80,
+                opacity: 0,
+                duration: 0.2,
+                ease: 'power2.in',
+                onComplete: () => {
+                    const newIdx = (openedProject.imageIndex + direction + images.length) % images.length;
+                    setOpenedProject(prev => ({
+                        ...prev,
+                        imageIndex: newIdx,
+                        src: images[newIdx].src
+                    }));
+                }
+            });
+        }
+    };
+
+    const openProjectImg = (title, src, projectIndex, imageSrc) => {
+        // Find ScrollTrigger instance for this specific project
+        const st = ScrollTrigger.getById(`project-trigger-${projectIndex}`);
         const currentY = window.scrollY || document.documentElement.scrollTop;
 
+        // Find the image index within only the image items
+        const images = getProjectImages(projectIndex);
+        const imageIndex = images.findIndex(img => img.src === imageSrc);
+
+        const openModal = () => {
+            setOpenedProject({ title, src: imageSrc, projectIndex, imageIndex: imageIndex >= 0 ? imageIndex : 0 });
+        };
+
         if (st && Math.abs(currentY - st.start) > 5) {
-            // Concurrently smoothly scroll the background to perfectly align the project
-            // using Lenis so it doesn't fight the user's smooth scroll instance
             if (lenis) {
-                lenis.scrollTo(st.start, { duration: 0.8, lock: true }); // lock prevents user scrolling during auto-scroll
+                lenis.scrollTo(st.start, { duration: 0.8, lock: true });
             } else {
                 window.scrollTo({ top: st.start, behavior: 'smooth' });
             }
-
-            // Wait 500ms for the scroll animation to visually progress before opening the modal
-            setTimeout(() => {
-                setOpenedProject({ title, src });
-            }, 500);
-
-            // Lock scrolling only after the alignment finishes, so we don't break the scroll animation
-            setTimeout(() => {
-                document.body.style.overflow = 'hidden';
-            }, 850);
+            setTimeout(openModal, 500);
+            setTimeout(() => { document.body.style.overflow = 'hidden'; }, 850);
         } else {
-            // If already aligned, open immediately
-            setOpenedProject({ title, src });
+            openModal();
             document.body.style.overflow = 'hidden';
         }
     };
 
     useEffect(() => {
         if (openedProject) {
+            // Slide new image in (after navigation)
+            const imgEl = imageRef.current;
+            if (imgEl && modalOpenRef.current) {
+                // This is a navigation change, slide the new image in from the opposite side
+                const dir = slideDirection.current || 1;
+                gsap.fromTo(imgEl,
+                    { x: dir * 80, opacity: 0 },
+                    { x: 0, opacity: 1, duration: 0.25, ease: 'power2.out' }
+                );
+                return;
+            }
+
+            // First-time modal open: play the enter animation
+            modalOpenRef.current = true;
             const modal = document.querySelector('.project-modal-container');
             const backdrop = document.querySelector('.project-modal-backdrop');
             if (modal && backdrop) {
                 gsap.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power3.out' });
                 gsap.fromTo(modal, { y: '100%' }, { y: '0%', duration: 0.5, ease: 'power3.out', delay: 0.1 });
             }
+        } else {
+            modalOpenRef.current = false;
         }
     }, [openedProject]);
 
@@ -283,7 +366,7 @@ export default function Projects() {
                             end: "+=150%",
                             pin: true,
                             pinSpacing: false,
-                            scrub: true,
+                            scrub: 0.5,
                         }
                     });
 
@@ -327,13 +410,6 @@ export default function Projects() {
                     <div className="absolute inset-0 opacity-40 pointer-events-none flex items-center justify-center overflow-hidden z-0">
                         {proj.canvas === 'laser' && (
                             <div className="relative w-full h-full" style={{ filter: 'url(#goo)' }}>
-                                <style>{`
-                                    @keyframes float1 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(15vw, -15vh) scale(1.2); } }
-                                    @keyframes float2 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-10vw, 20vh) scale(0.8); } }
-                                    @keyframes float3 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-18vw, -10vh) scale(1.1); } }
-                                    @keyframes float4 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(20vw, 20vh) scale(1.3); } }
-                                    @keyframes float5 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-5vw, -25vh) scale(0.9); } }
-                                `}</style>
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[35vw] h-[35vw] min-w-[400px] min-h-[400px] bg-accent rounded-full opacity-60 blur-xl mix-blend-multiply" style={{ animation: 'float1 12s ease-in-out infinite' }}></div>
                                 <div className="absolute top-[30%] left-[20%] w-[25vw] h-[25vw] min-w-[300px] min-h-[300px] bg-accent rounded-full opacity-70 blur-xl mix-blend-multiply" style={{ animation: 'float2 10s ease-in-out infinite' }}></div>
                                 <div className="absolute top-[70%] left-[80%] w-[40vw] h-[40vw] min-w-[500px] min-h-[500px] bg-accent rounded-full opacity-40 blur-xl mix-blend-multiply" style={{ animation: 'float3 15s ease-in-out infinite' }}></div>
@@ -344,25 +420,14 @@ export default function Projects() {
 
                         {proj.canvas === 'geometry' && (
                             <div className="relative w-full h-full font-data text-xl md:text-2xl font-bold uppercase tracking-widest text-dark overflow-hidden">
-                                <style>{`
-                                    @keyframes popupSentiment { 
-                                        0% { opacity: 0; transform: scale(0.8) translateY(20px); } 
-                                        15%, 85% { opacity: 1; transform: scale(1) translateY(0); } 
-                                        100% { opacity: 0; transform: scale(1.1) translateY(-20px); } 
-                                    }
-                                `}</style>
 
                                 {/* 14 Independent Randomized Popups */}
-                                {[...Array(14)].map((_, i) => <SentimentPopup key={i} />)}
+                                {[...Array(10)].map((_, i) => <SentimentPopup key={i} />)}
                             </div>
                         )}
 
                         {proj.canvas === 'waveform' && (
                             <div className="relative w-full h-full flex items-center justify-center overflow-hidden opacity-40">
-                                <style>{`
-                                    @keyframes drawTrendLine { 0% { stroke-dashoffset: 100; } 100% { stroke-dashoffset: 0; } }
-                                    @keyframes blinkTrendPoint { 0%, 100% { opacity: 1; r: 6; } 50% { opacity: 0.2; r: 16; } }
-                                `}</style>
                                 <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 1000 500">
                                     <path id="trendLine" d="M 0 450 C 100 450, 150 350, 250 380 C 350 410, 450 200, 550 250 C 650 300, 750 100, 850 120 C 950 140, 1000 50, 1000 50"
                                         fill="none" stroke="#E63B2E" strokeWidth="4" pathLength="100"
@@ -418,7 +483,7 @@ export default function Projects() {
 
                         {/* Card Swap Section */}
                         <div className="flex-1 lg:flex-1 w-full max-w-md md:max-w-2xl lg:max-w-none mx-auto min-h-0 relative flex items-center justify-center order-1 lg:order-2">
-                            <CardSwap items={proj.items} onImageClick={({ title, src }) => openProjectImg(proj.title, src, i)} />
+                            <CardSwap items={proj.items} onImageClick={({ title, src }) => openProjectImg(proj.title, src, i, src)} />
                         </div>
                     </div>
                 </div>
@@ -427,18 +492,18 @@ export default function Projects() {
             {/* Project Full Image Modal */}
             {openedProject && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10" onClick={closeProjectModal}>
-                    {/* Transparent Backdrop (No blur or dark overlay) */}
+                    {/* Transparent Backdrop */}
                     <div className="project-modal-backdrop absolute inset-0 bg-transparent opacity-0"></div>
 
-                    {/* Modal Content - 80% width and height */}
+                    {/* Modal Content */}
                     <div
                         className="project-modal-container relative w-[95vw] h-auto max-h-[85vh] md:w-[80vw] md:h-[80vh] flex flex-col rounded-2xl shadow-2xl translate-y-full"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Light Bend Glass Overlay (Matches Navbar Gloss) */}
+                        {/* Light Bend Glass Overlay */}
                         <div className="absolute inset-0 rounded-2xl pointer-events-none shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.2)] border border-white/20 z-30"></div>
 
-                        {/* Title Bar (Matte Glass) */}
+                        {/* Title Bar */}
                         <div className="flex items-center justify-between p-4 bg-paper/85 backdrop-blur-md border-b border-dark/10 text-dark z-20 shadow-sm rounded-t-2xl flex-shrink-0">
                             <h3 className="font-data font-bold tracking-widest uppercase text-sm md:text-base">{openedProject.title}</h3>
                             <button
@@ -450,13 +515,36 @@ export default function Projects() {
                             </button>
                         </div>
 
-                        {/* Image Viewer (Glossy Dark Glass) */}
+                        {/* Image Viewer */}
                         <div className="w-full flex-1 min-h-0 overflow-hidden flex items-center justify-center p-2 md:p-4 bg-dark/40 backdrop-blur-2xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.5),0_4px_20px_rgba(0,0,0,0.1)] relative z-10 rounded-b-2xl">
+                            {/* Prev Button */}
+                            {getProjectImages(openedProject.projectIndex).length > 1 && (
+                                <button
+                                    onClick={() => navigateModal(-1)}
+                                    className="absolute left-3 md:left-5 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-paper/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-paper/80 hover:bg-paper/30 hover:text-paper hover:scale-110 transition-all duration-200 shadow-lg"
+                                    aria-label="Previous image"
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
+                            )}
+
                             <img
+                                ref={imageRef}
                                 src={openedProject.src}
                                 alt={openedProject.title}
                                 className="w-full h-auto max-h-full md:w-auto md:h-full md:max-w-full object-contain mx-auto mix-blend-normal drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
                             />
+
+                            {/* Next Button */}
+                            {getProjectImages(openedProject.projectIndex).length > 1 && (
+                                <button
+                                    onClick={() => navigateModal(1)}
+                                    className="absolute right-3 md:right-5 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-paper/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-paper/80 hover:bg-paper/30 hover:text-paper hover:scale-110 transition-all duration-200 shadow-lg"
+                                    aria-label="Next image"
+                                >
+                                    <ChevronRight size={20} />
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

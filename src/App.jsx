@@ -29,7 +29,7 @@ function App() {
       }
     }
 
-    gsap.ticker.lagSmoothing(0);
+    gsap.ticker.lagSmoothing(500, 33);
     gsap.ticker.add(update);
 
     return () => {
