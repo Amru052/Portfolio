@@ -125,9 +125,8 @@ const CardSwap = memo(function CardSwap({ items, onImageClick }) {
         return () => clearInterval(interval);
     }, [isHovered]);
 
-    const handleSwap = (e, index) => {
+    const handleSwap = (e) => {
         e.stopPropagation();
-        if (index !== cards.length - 1) return; // Only swap top card
         setCards((prev) => {
             const newCards = [...prev];
             const topCard = newCards.pop();
@@ -228,7 +227,7 @@ const CardSwap = memo(function CardSwap({ items, onImageClick }) {
                             {isTop && cards.length > 1 && (
                                 <button
                                     className="absolute bottom-4 right-4 z-30 font-data text-xs text-dark bg-paper/90 backdrop-blur-md px-4 py-2 rounded shadow-lg uppercase tracking-widest hover:bg-paper hover:scale-105 transition-all"
-                                    onClick={(e) => handleSwap(e, sliceIdx)}
+                                    onClick={handleSwap}
                                 >
                                     Next Image
                                 </button>
